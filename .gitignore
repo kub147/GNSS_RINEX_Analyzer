@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+*.pyo
+.gnss_cache/
+plots_*/
