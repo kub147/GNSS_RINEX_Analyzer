@@ -1478,12 +1478,21 @@ def analyze_all():
             html += f'<div class="panel"><div class="err">❌ Observation parse error: {e}</div></div>'
             return html
 
-        try:
-            nav_bundle = resolve_navigation_bundle(BASE_DIR, obs_path, nav_path)
-            eph = nav_bundle['ephemerides']
-        except ValueError as e:
-            html += f'<div class="panel"><div class="err">❌ Observation/navigation mismatch: {e}</div></div>'
-            return html
+        # Fast path: use only uploaded nav file (skip slow directory walk)
+        eph = []
+        if nav_path and os.path.exists(nav_path):
+            try:
+                eph, _, _, _ = parse_rinex_nav(nav_path)
+            except:
+                pass
+        if not eph:
+            # Auto-find nav file in same directory only
+            auto_nav = find_nav_file(obs_path)
+            if auto_nav and os.path.exists(auto_nav):
+                try:
+                    eph, _, _, _ = parse_rinex_nav(auto_nav)
+                except:
+                    pass
 
         obs_pos = header.get('approx_pos')
         dop_data = None
@@ -2650,13 +2659,18 @@ def spp_data():
         # Try SPP with GPS-only for more accurate positions
         nav_path = _get_uploaded().get('nav') or find_nav_file(obs_path)
         eph = []
-        try:
-            nav_bundle = resolve_navigation_bundle(BASE_DIR, obs_path, nav_path)
-            eph = nav_bundle['ephemerides']
-        except ValueError as e:
-            return json.dumps({'error': str(e)})
-        if not eph and nav_path and os.path.exists(nav_path):
-            eph, _, _, _ = parse_rinex_nav(nav_path)
+        if nav_path and os.path.exists(nav_path):
+            try:
+                eph, _, _, _ = parse_rinex_nav(nav_path)
+            except:
+                pass
+        if not eph:
+            auto_nav = find_nav_file(obs_path)
+            if auto_nav and os.path.exists(auto_nav):
+                try:
+                    eph, _, _, _ = parse_rinex_nav(auto_nav)
+                except:
+                    pass
         
         if eph and obs_pos:
             try:
