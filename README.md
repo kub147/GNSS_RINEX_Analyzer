@@ -15,9 +15,13 @@ A web-based tool for analyzing GNSS RINEX observation and navigation files — g
 - **Statistics**: Session duration, satellite counts per system, SNR distribution, DOP values, frequency bands, Galileo SNR analysis
 - **Cross-File Validation**: Checks date consistency and system coverage between OBS, NAV, and SP3 files
 
-## Quick Start
+## Quick Start (Local)
 
 ```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the app
 python3 gnss_app.py
 ```
 
@@ -28,12 +32,45 @@ Open **http://localhost:8080** in your browser.
 3. (Optional) Upload an **SP3** file for precise vs broadcast comparison
 4. Click **Analyze** and explore the results
 
+## Deploy on PythonAnywhere
+
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/kub147/GNSS_RINEX_Analyzer
+   cd GNSS_RINEX_Analyzer
+   ```
+
+2. Create virtualenv and install dependencies:
+   ```bash
+   mkvirtualenv --python=/usr/bin/python3.10 gnss
+   pip install -r requirements.txt
+   ```
+
+3. In the PythonAnywhere **Web** tab:
+   - **Source code**: `/home/YOUR_USER/GNSS_RINEX_Analyzer`
+   - **Working directory**: `/home/YOUR_USER/GNSS_RINEX_Analyzer`
+   - **WSGI configuration file**: edit and paste:
+     ```python
+     import sys
+     path = '/home/YOUR_USER/GNSS_RINEX_Analyzer'
+     if path not in sys.path:
+         sys.path.insert(0, path)
+     import matplotlib
+     matplotlib.use('Agg')
+     from gnss_app import app as application
+     ```
+   - **Virtualenv**: `/home/YOUR_USER/.virtualenvs/gnss`
+
+4. Click **Reload**.
+
+The app runs locally with `python3 gnss_app.py` and on PythonAnywhere via the WSGI file — same code, no changes needed.
+
 ## Requirements
 
 - Python 3.10+
 - Flask
 - NumPy
-- Matplotlib
+- Matplotlib (Agg backend — works headless)
 - A modern web browser
 
 ## File Format Support
