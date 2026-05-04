@@ -1,5 +1,16 @@
+# Byte-compiled
 __pycache__/
 *.pyc
 *.pyo
+
+# IDE
+.idea/
+.vscode/
+
+# macOS
+.DS_Store
+
+# Project specific
 .gnss_cache/
 plots_*/
+
