@@ -12,7 +12,7 @@ Run:   python3 gnss_app.py
 Open:  http://localhost:8080
 """
 
-import os, sys, json, base64, io, math, re, threading, webbrowser, shutil, tempfile, zipfile
+import os, sys, json, base64, io, math, re, threading, webbrowser, shutil, tempfile, zipfile, hashlib
 from pathlib import Path
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -29,7 +29,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from rinex_analyzer import *
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+# Use a fixed key derived from the app path so Flask sessions survive restarts
+app.secret_key = hashlib.sha256(os.path.abspath(__file__).encode()).hexdigest()
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.join(tempfile.gettempdir(), 'gnss_uploads')
